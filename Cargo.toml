@@ -1,5 +1,5 @@
 [package]
-name = "rs_cmp_json"
+name = "cmp_json"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
