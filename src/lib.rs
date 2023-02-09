@@ -1,6 +1,35 @@
+//! A set of functions that simplifies comparison between two JSON objects. 
 use serde_json::Value;
 
-pub fn cmp_json_expected(got: &Value, exp: &Value) -> bool {
+/// A compare function between two JSON Values. Compare returns a boolean true 
+/// or false if the Valus are equal. Takes the `exp` argument as the base of 
+/// the comparison.
+/// 
+/// This function compares to see that all values in the `exp` argument are also 
+/// present in the `got` argument. It will still return true if `got` has extra
+/// object elements not present in `exp`
+/// 
+/// ```rust
+/// 
+/// use serde_json::json;
+/// use cmp_json::cmp_expected;
+/// 
+/// let exp = json!{{
+///     "some": "value"
+/// }};
+/// let got_extra = json!{{
+///     "some": "value",
+///     "another": "element",
+/// }};
+/// let got_different = json!{{
+///     "some": 2
+/// }};
+/// 
+/// assert!(cmp_expected(&got_extra, &exp));
+/// assert!(cmp_expected(&got_different, &exp) == false);
+/// ```
+/// 
+pub fn cmp_expected(got: &Value, exp: &Value) -> bool {
     match exp {
         Value::Array(e_arr) => {
             match got.as_array() {
@@ -10,7 +39,7 @@ pub fn cmp_json_expected(got: &Value, exp: &Value) -> bool {
                     }
                     e_arr.iter().zip(
                         g_arr.iter()
-                    ).all(|(e, g)| cmp_json_expected(g, e))
+                    ).all(|(e, g)| cmp_expected(g, e))
                 }
                 None => false
             } 
@@ -23,7 +52,7 @@ pub fn cmp_json_expected(got: &Value, exp: &Value) -> bool {
                     e_obj.iter().all(
                         |(k, e_val)| 
                         match g_obj.get(k) {
-                            Some(g_val) => cmp_json_expected(g_val, e_val),
+                            Some(g_val) => cmp_expected(g_val, e_val),
                             None => false
                         }
                     )
@@ -46,7 +75,7 @@ mod tests {
         let got = json!(Null);
         let exp = json!(Null);
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             true
         );
     }
@@ -56,7 +85,7 @@ mod tests {
         let got = json!("Null");
         let exp = json!(Null);
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
@@ -66,7 +95,7 @@ mod tests {
         let got = json!("something");
         let exp = json!("something");
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             true
         );
     }
@@ -76,7 +105,7 @@ mod tests {
         let got = json!("something");
         let exp = json!("something else");
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
@@ -86,7 +115,7 @@ mod tests {
         let got = json!(-12.3);
         let exp = json!(-12.3);
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             true
         );
     }
@@ -96,7 +125,7 @@ mod tests {
         let got = json!(-12.5);
         let exp = json!(6);
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
@@ -106,7 +135,7 @@ mod tests {
         let got = json!(true);
         let exp = json!(true);
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             true
         );
     }
@@ -116,7 +145,7 @@ mod tests {
         let got = json!(true);
         let exp = json!(false);
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
@@ -126,7 +155,7 @@ mod tests {
         let got = json!{["string", 1234, false, [1, 2, 3]]};
         let exp = json!{["string", 1234, false, [1, 2, 3]]};
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             true
         );
     }
@@ -136,7 +165,7 @@ mod tests {
         let got = json!{["string", 1234, "false"]};
         let exp = json!{["string", 1234, false]};
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
@@ -146,7 +175,7 @@ mod tests {
         let got = json!{["string", 1234, false, "extra"]};
         let exp = json!{["string", 1234, false]};
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
@@ -156,7 +185,7 @@ mod tests {
         let got = json!{["string", 1234, false]};
         let exp = json!{["string", 1234, false, "extra"]};
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
@@ -166,7 +195,7 @@ mod tests {
         let got = json!{["string", 1234, false, [1, 2, 3, "wrong"]]};
         let exp = json!{["string", 1234, false, [1, 2, 3]]};
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
@@ -188,7 +217,7 @@ mod tests {
             ],
         }};
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             true
         );
     }
@@ -211,7 +240,7 @@ mod tests {
             ],
         }};
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             true
         );
     }
@@ -234,7 +263,7 @@ mod tests {
             "another": "field",
         }};
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
@@ -256,7 +285,7 @@ mod tests {
             ],
         }};
         assert_eq!(
-            cmp_json_expected(&got, &exp), 
+            cmp_expected(&got, &exp), 
             false
         );
     }
