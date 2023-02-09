@@ -1,7 +1,12 @@
 [package]
-name = "rs-cmp-json"
+name = "rs_cmp_json"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Comparators for JSON represented by serde_json::Value"
+repostiory = "https://github.com/kingledion/rs_cmp_json"
+readme = "README.md"
+keywords = ["serde", "assert", "compare", "testing"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
